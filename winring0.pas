@@ -1,16 +1,18 @@
 unit winring0;
 
-// WinRing0 is a DLL file used to access interanl system addresses, ports,
-// registers, and counters.
-// from CrystalDewWorld.
-// The library name is OpenLibSys and exports 54 functions
-// The original author of WinRing0 is hiyohiyo
-// WinRing0 license: The modified BSD license
-// WinRing0 is a copyright of OpenLibSys.org. All rights reserved.
-//
-// Pascal header conversion by ThisOldCPU
 
-interface
+// WinRing0 is a DLL file used to access interanl system addresses, ports,
+// registers, and counters from CrystalDewWorld.
+// The library name is OpenLibSys and exports 54 functions
+//
+// The original author of WinRing0 is hiyohiyo
+// WinRing0 license: The modified BSD license
+// WinRing0 is a copyright of OpenLibSys.org. All rights reserved.
+//
+// Pascal header conversion by Jason McClain (ThisOldCPU)
+
+
+interface
 
 uses Windows, SysUtils;
 
