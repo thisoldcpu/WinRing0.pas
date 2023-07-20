@@ -1,16 +1,14 @@
 unit winring0;
 
-
-// WinRing0 is a DLL file used to access interanl system addresses, ports,
-// registers, and counters from CrystalDewWorld.
-// The library name is OpenLibSys and exports 54 functions
+// -----------------------------------------------------------------------------
+// Pascal header translation for WinRing0.DLL and WinRing0x64.DLL
 //
-// The original author of WinRing0 is hiyohiyo
-// WinRing0 license: The modified BSD license
-// WinRing0 is a copyright of OpenLibSys.org. All rights reserved.
+// WinRing0.DLL and WinRing0x64.DLL, part of OpenLibSys from CrystalDewWorld,
+// are linked library files used to access internal system addresses, counters,
+// ports, and registers.
 //
-// Pascal header conversion by Jason McClain (ThisOldCPU)
-
+//  There are 54 exported functions, each is supported and documented.
+// -----------------------------------------------------------------------------
 
 interface
 
@@ -79,6 +77,10 @@ type
     TRdtscPx = function(index: DWORD; var eax, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;
     TRdtscTx = function(index: DWORD; var eax, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;
 
+    TWrmsr = function(index: DWORD; var eax, edx: DWORD): BOOL; stdcall;
+    TWrmsrPx = function(index: DWORD; var eax, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;              //
+    TWrmsrTx = function(index: DWORD; var eax, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;               //
+
     TReadIoPortByte = function(port: WORD): BYTE; stdcall;                                                              // Read a Byte from I/O port
     TReadIoPortWord = function(port: WORD): WORD; stdcall;                                                              // Read a WORD from I/O port
     TReadIoPortDword = function(port: WORD): DWORD; stdcall;                                                            // Read a DWORD from I/O port
@@ -116,13 +118,11 @@ type
     TFindPciDeviceByClass = function(baseClass, subClass, programIf, index: Byte): uInt; stdcall;                       //
     TFindPciDeviceById = function(vendorId, deviceId: uShort; index: byte): Cardinal; stdcall;                          //
 
+  {$IFDEF _PHYSICAL_MEMORY_SUPPORT}
     TReadDmiMemory = function(buffer: PBYTE; count, unitSize: DWORD): DWORD; stdcall;
     TReadPhysicalMemory = function(address: DWORD_PTR; buffer: PBYTE; count, unitSize: DWORD): DWORD; stdcall;          //
     TWritePhysicalMemory = function(address: DWORD_PTR; buffer: PBYTE; count, unitSize: DWORD): DWORD; stdcall;         //
-
-    TWrmsr = function(index: DWORD; var eax, edx: DWORD): BOOL; stdcall;
-    TWrmsrPx = function(index: DWORD; var eax, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;              //
-    TWrmsrTx = function(index: DWORD; var eax, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;               //
+  {$ENDIF}
   private
     FModule: THandle;
     FOlsStatus: TOlsStatus;
@@ -200,9 +200,11 @@ type
     FFindPciDeviceById: TFindPciDeviceById;
     FFindPciDeviceByClass: TFindPciDeviceByClass;
 
+  {$IFDEF _PHYSICAL_MEMORY_SUPPORT}
     FReadDmiMemory: TReadDmiMemory;
     FReadPhysicalMemory: TReadPhysicalMemory;
     FWritePhysicalMemory: TWritePhysicalMemory;
+  {$ENDIF}
 
   public
     property CPUID: TCpuid read FCpuid;
@@ -251,6 +253,12 @@ type
     property ReadIoPortByteEx: TReadIoPortByteEx read FReadIoPortByteEx;
     property ReadIoPortWordEx: TReadIoPortWordEx read FReadIoPortWordEx;
     property ReadIoPortDwordEx: TReadIoPortDwordEx read FReadIoPortDwordEx;
+
+  {$IFDEF _PHYSICAL_MEMORY_SUPPORT}
+    property ReadDmiMemory: TReadDmiMemory read FReadDmiMemory;
+    property ReadPhysicalMemory: TReadPhysicalMemory read FReadPhysicalMemory;
+    property WritePhysicalMemory: TWritePhysicalMemory read FWritePhysicalMemory;
+  {$ENDIF}
 
     constructor Create;
     destructor Destroy; override;
@@ -347,9 +355,11 @@ begin
     FFindPciDeviceById := GetProcAddress(FModule, 'FindPciDeviceById');
     FFindPciDeviceByClass := GetProcAddress(FModule, 'FindPciDeviceByClass');
 
+    {$IFDEF _PHYSICAL_MEMORY_SUPPORT}
     FReadDmiMemory := GetProcAddress(FModule, 'ReadDmiMemory');
     FReadPhysicalMemory := GetProcAddress(FModule, 'ReadPhysicalMemory');
     FWritePhysicalMemory := GetProcAddress(FModule, 'WritePhysicalMemory');
+    {$ENDIF}
 
     // Check Functions
     if (not(Assigned(FGetDllStatus) and Assigned(FGetDllVersion) and
