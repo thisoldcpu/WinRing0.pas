@@ -263,7 +263,13 @@ type
     constructor Create;
     destructor Destroy; override;
     function GetOlsStatus: TOlsStatus;
+    function GetDLLStatusString: String;
+    function GetOlsStatusString: String;
+    function GetOlsDriverTypeString: String;
   end;
+
+var
+  Ring0: TWinRing0;
 
 implementation
 
@@ -393,7 +399,68 @@ end;
 
 function TWinRing0.GetOlsStatus: TOlsStatus;
 begin
-  result := FOlsStatus;
+  Result := FOlsStatus;
+end;
+
+function TWinRing0.GetDLLStatusString: String;
+begin
+  Result := 'Unknown error';
+
+  case GetDllStatus of
+    0:
+      Result := 'No errors';
+    1:
+      Result := 'Unsupported Platform';
+    2:
+      Result := 'Driver is not loaded';
+    3:
+      Result := 'Driver not found';
+    4:
+      Result := 'Driver unloaded';
+    5:
+      Result := 'Driver not loaded on network';
+    6:
+      Result := 'Unknown error';
+  end;
+end;
+
+function TWinRing0.GetOlsStatusString: String;
+begin
+  Result := 'Unknown error';
+
+  case GetOlsStatus of
+    NO_ERROR:
+      Result := 'No errors';
+
+    DLL_NOT_FOUND:
+      Result := 'DLL not found';
+
+    DLL_INCORRECT_VERSION:
+      Result := 'DLL version is incorrect';
+
+    DLL_INITIALIZE_ERROR:
+      Result := 'DLL initialization errror';
+  end;
+end;
+
+function TWinRing0.GetOlsDriverTypeString: String;
+begin
+  Result := 'Unknown';
+
+  case GetDriverType of
+    0:
+      Result := 'Unknown';
+    1:
+      Result := 'Windows 9x';
+    2:
+      Result := 'Windows NT';
+    3:
+      Result := 'Windows NT4';
+    4:
+      Result := 'Windows NT x64';
+    5:
+      Result := 'Windows NT IA64';
+  end;
 end;
 
 end.
