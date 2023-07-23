@@ -55,9 +55,9 @@ type
     TGetDriverType = function: DWORD; stdcall;                                                                          // Get device driver type
     TGetDriverVersion = function(var major, minor, revision, release: Byte): DWORD; stdcall;                            // Get device driver version
 
-    THlt = function: Integer; stdcall;                                                                                  //
-    THltTx = function(threadAffinityMask: UIntPtr): Integer; stdcall;                                                   //
-    THltPx = function(processAffinityMask:UIntPtr): Integer; stdcall;                                                   //
+    THlt = function: Integer; stdcall;                                                                                  // "halt" instruction. When executed it puts the CPU into a low-power state, waiting for the next interrupt.
+    THltTx = function(threadAffinityMask: UIntPtr): Integer; stdcall;                                                   // "halt" using a processAffintityMask
+    THltPx = function(processAffinityMask:UIntPtr): Integer; stdcall;                                                   // "halt" using a threadAffintityMask
 
     TInitializeOls = function: BOOL; stdcall;                                                                           // Initialize OpenLibSys
 
