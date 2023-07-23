@@ -7,7 +7,18 @@ unit winring0;
 // are linked library files used to access internal system addresses, counters,
 // ports, and registers.
 //
-//  There are 54 exported functions, each is supported and documented.
+// This unit provides a header translation for the WinRing0.DLL and
+// WinRing0x64.DLL libraries. These libraries are used to access internal
+// system addresses, counters, ports, and registers by providing low-level
+// access to hardware components like CPU, memory, and PCI devices.
+//
+// The original author of WinRing0 is hiyohiyo
+// WinRing0 license: The modified BSD license
+// WinRing0 is a copyright of OpenLibSys.org. All rights reserved.
+//
+// Pascal header conversion by Jason McClain (ThisOldCPU 2023)
+//
+// There are 54 exported functions, 3 hidden functions, and 4 helper functions.
 // -----------------------------------------------------------------------------
 
 interface
@@ -44,11 +55,12 @@ type
                       OLS_DRIVER_TYPE_WIN_NT_X64 = 4,
                       OLS_DRIVER_TYPE_WIN_NT_IA64 = 5);
 
-    TCpuid = function(index: DWORD; var eax, ebx, ecx, edx: DWORD): BOOL; stdcall;                                      //
-    TCpuidPx = function(index: DWORD; var eax, ebx, ecx, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;    //
-    TCpuidTx = function(index: DWORD; var eax, ebx, ecx, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;     //
+    TInitializeOls = function: BOOL; stdcall;                                                                           // Initialize OpenLibSys
+    TDeinitializeOls = procedure; stdcall;                                                                              // Shutdown OpenLibSys
 
-    TDeinitializeOls = procedure; stdcall;
+    TCpuid = function(index: DWORD; var eax, ebx, ecx, edx: DWORD): BOOL; stdcall;                                      // Read CPUID
+    TCpuidPx = function(index: DWORD; var eax, ebx, ecx, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;    // Read CPUID using a processAffintityMask
+    TCpuidTx = function(index: DWORD; var eax, ebx, ecx, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;     // Read CPUID using a threadAffintityMask
 
     TGetDllStatus = function: DWORD; stdcall;                                                                           // Is the WinRing0 DLL valid and loaded?
     TGetDllVersion = function(var major, minor, revision, release: Byte): DWORD; stdcall;                               // Returns the curent version of WinRing0 DLL
@@ -59,27 +71,25 @@ type
     THltTx = function(threadAffinityMask: UIntPtr): Integer; stdcall;                                                   // "halt" using a processAffintityMask
     THltPx = function(processAffinityMask:UIntPtr): Integer; stdcall;                                                   // "halt" using a threadAffintityMask
 
-    TInitializeOls = function: BOOL; stdcall;                                                                           // Initialize OpenLibSys
-
     TIsCpuid = function: BOOL; stdcall;                                                                                 // Is CPUID present?
     TIsMsr = function: BOOL; stdcall;                                                                                   // Are Model-Specific Registers present?
     TIsTsc = function: BOOL; stdcall;                                                                                   // Are Time-Stamp Counters present?
 
     TRdmsr = function(index: DWORD; var eax: DWORD; var edx: DWORD): BOOL; stdcall;                                     // Read Model Specific Register
-    TRdmsrPx = function(index: DWORD; var eax, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;
-    TRdmsrTx = function(index: DWORD; var eax, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;
+    TRdmsrPx = function(index: DWORD; var eax, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;              // Read MSR using a processAffintityMask
+    TRdmsrTx = function(index: DWORD; var eax, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;               // Read MSR using a threadAffintityMask
 
     TRdpmc = function(index: DWORD; var eax: DWORD; var edx: DWORD): BOOL; stdcall;                                     // Read Performance-Monitoring Counter
-    TRdpmcPx = function(index: DWORD; var eax, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;
-    TRdpmcTx = function(index: DWORD; var eax, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;
+    TRdpmcPx = function(index: DWORD; var eax, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;              // Read PMC using a processAffintityMask
+    TRdpmcTx = function(index: DWORD; var eax, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;               // Read PMC using a threadAffintityMask
 
     TRdtsc = function(index: DWORD; var eax: DWORD; var edx: DWORD): BOOL; stdcall;                                     // Read Time-Stamp Counter
-    TRdtscPx = function(index: DWORD; var eax, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;
-    TRdtscTx = function(index: DWORD; var eax, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;
+    TRdtscPx = function(index: DWORD; var eax, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;              // Read TSC using a processAffintityMask
+    TRdtscTx = function(index: DWORD; var eax, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;               // Read TSC using a threadAffintityMask
 
-    TWrmsr = function(index: DWORD; var eax, edx: DWORD): BOOL; stdcall;
-    TWrmsrPx = function(index: DWORD; var eax, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;              //
-    TWrmsrTx = function(index: DWORD; var eax, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;               //
+    TWrmsr = function(index: DWORD; var eax, edx: DWORD): BOOL; stdcall;                                                // Write Model Specific Register
+    TWrmsrPx = function(index: DWORD; var eax, edx: DWORD; processAffinityMask: DWORD_PTR): BOOL; stdcall;              // Write MSR using a processAffintityMask
+    TWrmsrTx = function(index: DWORD; var eax, edx: DWORD; threadAffinityMask: DWORD_PTR): BOOL; stdcall;               // Write MSR using a threadAffintityMask
 
     TReadIoPortByte = function(port: WORD): BYTE; stdcall;                                                              // Read a Byte from I/O port
     TReadIoPortWord = function(port: WORD): WORD; stdcall;                                                              // Read a WORD from I/O port
@@ -97,31 +107,31 @@ type
     TWriteIoPortWordEx = function(port: WORD; value: WORD): Boolean; stdcall;                                           // Read a WORD from I/O port with error checking
     TWriteIoPortDwordEx = function(port: WORD; value: DWORD): Boolean; stdcall;                                         // Read a DWORD from I/O port with error checking
 
-    TSetPciMaxBusIndex = procedure (max: BYTE); stdcall;                                                                //
+    TSetPciMaxBusIndex = procedure (max: BYTE); stdcall;                                                                // Set highest PCI Bus Index value
 
-    TReadPciConfigByte = function(pciAddress: DWORD; regAddress: BYTE): BYTE; stdcall;                                  //
-    TReadPciConfigWord = function(pciAddress: DWORD; regAddress: BYTE): WORD; stdcall;                                  //
-    TReadPciConfigDword = function(pciAddress: DWORD; regAddress: BYTE): DWORD; stdcall;                                //
+    TReadPciConfigByte = function(pciAddress: DWORD; regAddress: BYTE): BYTE; stdcall;                                  // Read a Byte from PCI configuration space of specified PCI device
+    TReadPciConfigWord = function(pciAddress: DWORD; regAddress: BYTE): WORD; stdcall;                                  // Read a Word from PCI configuration space of specified PCI device
+    TReadPciConfigDword = function(pciAddress: DWORD; regAddress: BYTE): DWORD; stdcall;                                // Read a DWord from PCI configuration space of specified PCI device
 
-    TReadPciConfigByteEx = function(pciAddress, regAddress: DWORD; value: PBYTE): Boolean; stdcall;                     //
-    TReadPciConfigWordEx = function(pciAddress, regAddress: DWORD; value: PWORD): Boolean; stdcall;                     //
-    TReadPciConfigDwordEx = function(pciAddress, regAddress: DWORD; value: PDWORD): Boolean; stdcall;                   //
+    TReadPciConfigByteEx = function(pciAddress, regAddress: DWORD; value: PBYTE): Boolean; stdcall;                     // Read a Byte from PCI configuration space of specified PCI device with error checking
+    TReadPciConfigWordEx = function(pciAddress, regAddress: DWORD; value: PWORD): Boolean; stdcall;                     // Read a Word from PCI configuration space of specified PCI device with error checking
+    TReadPciConfigDwordEx = function(pciAddress, regAddress: DWORD; value: PDWORD): Boolean; stdcall;                   // Read a DWord from PCI configuration space of specified PCI device with error checking
 
-    TWritePciConfigByte = procedure(pciAddress: DWORD; regAddress: BYTE; value: BYTE); stdcall;                         //
-    TWritePciConfigWord = procedure(pciAddress: DWORD; regAddress: BYTE; value: WORD); stdcall;                         //
-    TWritePciConfigDword = procedure(pciAddress: DWORD; regAddress: BYTE; value: DWORD); stdcall;                       //
+    TWritePciConfigByte = procedure(pciAddress: DWORD; regAddress: BYTE; value: BYTE); stdcall;                         // Write a Byte to the PCI configuration space of specified PCI device
+    TWritePciConfigWord = procedure(pciAddress: DWORD; regAddress: BYTE; value: WORD); stdcall;                         // Write a Word to the PCI configuration space of specified PCI device
+    TWritePciConfigDword = procedure(pciAddress: DWORD; regAddress: BYTE; value: DWORD); stdcall;                       // Write a DWord to the PCI configuration space of specified PCI device
 
-    TWritePciConfigByteEx = function(pciAddress, regAddress: DWORD; value: BYTE): Boolean; stdcall;                     //
-    TWritePciConfigWordEx = function(pciAddress, regAddress: DWORD; value: WORD): Boolean; stdcall;                     //
-    TWritePciConfigDwordEx = function(pciAddress, regAddress: DWORD; value: DWORD): Boolean; stdcall;                   //
+    TWritePciConfigByteEx = function(pciAddress, regAddress: DWORD; value: BYTE): Boolean; stdcall;                     // Write a Byte to PCI configuration space of specified PCI device with error checking
+    TWritePciConfigWordEx = function(pciAddress, regAddress: DWORD; value: WORD): Boolean; stdcall;                     // Write a Word to PCI configuration space of specified PCI device with error checking
+    TWritePciConfigDwordEx = function(pciAddress, regAddress: DWORD; value: DWORD): Boolean; stdcall;                   // Write a DWord to PCI configuration space of specified PCI device with error checking
 
-    TFindPciDeviceByClass = function(baseClass, subClass, programIf, index: Byte): uInt; stdcall;                       //
-    TFindPciDeviceById = function(vendorId, deviceId: uShort; index: byte): Cardinal; stdcall;                          //
+    TFindPciDeviceByClass = function(baseClass, subClass, programIf, index: Byte): uInt; stdcall;                       // Find a PCI device that matches the specified class and subclass values in PCI configuration space
+    TFindPciDeviceById = function(vendorId, deviceId: uShort; index: byte): Cardinal; stdcall;                          // Find a PCI device that matches specific vendor ID and device ID values in PCI configuration space
 
   {$IFDEF _PHYSICAL_MEMORY_SUPPORT}
-    TReadDmiMemory = function(buffer: PBYTE; count, unitSize: DWORD): DWORD; stdcall;
-    TReadPhysicalMemory = function(address: DWORD_PTR; buffer: PBYTE; count, unitSize: DWORD): DWORD; stdcall;          //
-    TWritePhysicalMemory = function(address: DWORD_PTR; buffer: PBYTE; count, unitSize: DWORD): DWORD; stdcall;         //
+    TReadDmiMemory = function(buffer: PBYTE; count, unitSize: DWORD): DWORD; stdcall;                                   // Read data from Direct Memory Access (DMI) memory region (unitSize: Byte, Word, DWord)
+    TReadPhysicalMemory = function(address: DWORD_PTR; buffer: PBYTE; count, unitSize: DWORD): DWORD; stdcall;          // Read data from physical memory (RAM) of the local system (unitSize: Byte, Word, DWord)
+    TWritePhysicalMemory = function(address: DWORD_PTR; buffer: PBYTE; count, unitSize: DWORD): DWORD; stdcall;         // Write data to physical memory (RAM) of the local system (unitSize: Byte, Word, DWord)
   {$ENDIF}
   private
     FModule: THandle;
